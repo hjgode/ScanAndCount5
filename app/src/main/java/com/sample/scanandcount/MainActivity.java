@@ -13,6 +13,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.Window;
@@ -33,6 +34,8 @@ import com.honeywell.aidc.TriggerStateChangeEvent;
 
 import static android.view.KeyEvent.KEYCODE_ENTER;
 import static android.view.KeyEvent.KEYCODE_ESCAPE;
+import static android.view.MotionEvent.ACTION_DOWN;
+import static android.view.MotionEvent.ACTION_UP;
 import static com.honeywell.aidc.BarcodeReader.PROPERTY_TRIGGER_CONTROL_MODE;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, BarcodeReader.BarcodeListener,
@@ -93,7 +96,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnEnter.setOnClickListener(this);
         btnClr.setOnClickListener(this);
 
-        btnScan.setOnClickListener(this);
+        //btnScan.setOnClickListener(this);
+        btnScan.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                Log.d(TAG, "OnTouch: " + motionEvent.getAction());
+                switch (motionEvent.getAction()){
+                    case ACTION_DOWN:
+                        doScan();
+                        break;
+                    case ACTION_UP:
+                        doStopScan();
+                        break;
+                }
+
+                return true;
+            }
+        });
 
         if(savedInstanceState!=null){
             txtScan.setText(savedInstanceState.getString("MyScan"));
@@ -125,6 +144,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View view){
         Log.d(TAG, "onClick: "+view.toString());
         switch (view.getId()) {
+            //TODO: OBSOLETE
             case R.id.btnScan:
                 doScan();
                 break;
@@ -214,6 +234,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         savedInstanceState.putString("MyScan", txtScan.getText().toString());
         savedInstanceState.putString("MyAmount", txtAmount.getText().toString());
         // etc.
+    }
+
+    private void doStopScan(){
+        if(barcodeReader!=null) {
+                try {
+                    barcodeReader.aim(false);
+                    barcodeReader.light(false);
+                    barcodeReader.decode(false);
+                }catch (Exception ex){
+                    Log.d(TAG, "exception in doStopScan(): " +ex.getMessage());
+                }
+        }
     }
 
     private void doScan(){
