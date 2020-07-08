@@ -387,6 +387,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Log.d(TAG, "onTriggerevent");
         if(scannerEnabled && event.getState()==true) //pressed?
             doScan();
+        else if (event.getState()==false)
+            doStopScan();
 //        try {
 //            // only handle trigger presses
 //            // turn on/off aimer, illumination and decoding
